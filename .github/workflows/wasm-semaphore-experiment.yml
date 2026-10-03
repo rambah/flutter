@@ -59,7 +59,7 @@ jobs:
         working-directory: engine/src
         run: |
           python3 flutter/tools/gn --web --runtime-mode=release --no-rbe --no-goma
-          /usr/bin/ninja -C out/wasm_release -j 4 flutter/third_party/canvaskit:skwasm_group
+          /usr/bin/ninja -C out/wasm_release -j 4 flutter/third_party/canvaskit:skwasm_group flutter/third_party/canvaskit:wimp_group
       - name: Save experimental artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -68,4 +68,5 @@ jobs:
           if-no-files-found: error
           path: |
             engine/src/out/wasm_release/flutter_web_sdk/canvaskit/skwasm*
+            engine/src/out/wasm_release/flutter_web_sdk/canvaskit/wimp*
             semaphore-test-build/
