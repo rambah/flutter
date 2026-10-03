@@ -71,6 +71,11 @@ approximately six seconds. The semaphore-corrected copy completed 300 seconds
 and 5,409 rendered frames without a reported runtime error. Both exercised
 multi-threaded Skwasm in the same Chrome version. This supports the suspected
 cause, but does not establish production stability or unchanged input latency.
+Three additional cold browser launches each completed a 30-second diagnostic
+stress run (511, 528 and 528 rendered frames, with no reported runtime errors).
+A mocked application home view rendered and correctly filtered/restored search
+results in both single-threaded and multi-threaded mode with the diagnostic
+copy. This does not cover live authentication, payments or embedded services.
 
 No production release is approved by these tests. Main-thread spinning can
 increase input latency under contention, even when it fixes corruption.
