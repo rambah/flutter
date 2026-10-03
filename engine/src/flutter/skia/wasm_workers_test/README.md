@@ -61,6 +61,12 @@ The fork's `Experimental Skwasm semaphore build` workflow additionally attempts
 a source build of the complete lightweight Skwasm renderer. Its artifacts are
 experimental and must not be substituted into a different engine revision.
 
+[Source build 37146362928](https://github.com/rambah/flutter/actions/runs/37146362928)
+succeeded for commit `fa76ee7dcf55d037f3f8d95c3aaba92c7faff734`. The log confirms
+compilation of `skia.SkSemaphore_wasm_workers.o` and linking of `skwasm.js`.
+This covers the lightweight renderer; a matched-SDK application test of these
+source-built artifacts has not yet been performed.
+
 A separate local diagnostic applied equivalent semaphore logic to a copy of
 an existing renderer and ran a text-layout/raster stress fixture. That is
 causal diagnosis, not a source-build integration test. The source-built
