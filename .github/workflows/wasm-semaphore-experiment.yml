@@ -3,6 +3,10 @@ name: Experimental Skwasm semaphore build
 on:
   push:
     branches: [fix/skwasm-wasm-worker-semaphore]
+    paths:
+      - engine/src/flutter/skia/**
+      - '!engine/src/flutter/skia/**/*.md'
+      - .github/workflows/wasm-semaphore-experiment.yml
   workflow_dispatch:
 
 permissions:
@@ -26,6 +30,8 @@ jobs:
           persist-credentials: false
       - name: Fetch engine build dependencies
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ninja-build
           git clone --depth=1 https://chromium.googlesource.com/chromium/tools/depot_tools.git "$RUNNER_TEMP/depot_tools"
           echo "$RUNNER_TEMP/depot_tools" >> "$GITHUB_PATH"
           export PATH="$RUNNER_TEMP/depot_tools:$PATH"
@@ -53,7 +59,7 @@ jobs:
         working-directory: engine/src
         run: |
           python3 flutter/tools/gn --web --runtime-mode=release --no-rbe --no-goma
-          ninja -C out/wasm_release -j 4 flutter/third_party/canvaskit:skwasm_group
+          /usr/bin/ninja -C out/wasm_release -j 4 flutter/third_party/canvaskit:skwasm_group
       - name: Save experimental artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

@@ -24,5 +24,6 @@ for name, implementation in [
       str(args.emxx.resolve()), '-std=c++20', '-O2', '-DSK_RELEASE',
       '-sWASM_WORKERS=1', '-sASSERTIONS=1', '-sENVIRONMENT=web,worker',
       '-I' + str(args.skia.resolve()), str(here / 'semaphore_test.cpp'),
-      str(implementation.resolve()), '-o', str(args.output.resolve() / (name + '.html')),
+      str(implementation.resolve()), '-o',
+      str(args.output.resolve() / (name + '.html')),
   ], check=True)
