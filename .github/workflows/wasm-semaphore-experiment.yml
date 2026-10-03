@@ -1,0 +1,65 @@
+name: Experimental Skwasm semaphore build
+
+on:
+  push:
+    branches: [fix/skwasm-wasm-worker-semaphore]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wasm-semaphore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.repository == 'rambah/flutter'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      DEPOT_TOOLS_UPDATE: '0'
+      DEPOT_TOOLS_METRICS: '0'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Fetch engine build dependencies
+        run: |
+          git clone --depth=1 https://chromium.googlesource.com/chromium/tools/depot_tools.git "$RUNNER_TEMP/depot_tools"
+          echo "$RUNNER_TEMP/depot_tools" >> "$GITHUB_PATH"
+          export PATH="$RUNNER_TEMP/depot_tools:$PATH"
+          python3 - <<'PY'
+          import pathlib
+          scope = {}
+          exec(pathlib.Path('engine/scripts/standard.gclient').read_text(), scope)
+          solutions = scope['solutions']
+          solutions[0]['custom_vars'] = {
+            'download_emsdk': True,
+            'download_android_deps': False,
+            'download_fuchsia_deps': False,
+            'setup_githooks': False,
+          }
+          pathlib.Path('.gclient').write_text('solutions = ' + repr(solutions))
+          PY
+          gclient sync --no-history --shallow --jobs=4
+      - name: Compile the candidate against pinned Skia headers
+        run: |
+          python3 engine/src/flutter/skia/wasm_workers_test/build.py \
+            --emxx engine/src/flutter/prebuilts/emsdk/upstream/emscripten/em++ \
+            --skia engine/src/flutter/third_party/skia \
+            --output semaphore-test-build
+      - name: Build the complete Skwasm renderer from source
+        working-directory: engine/src
+        run: |
+          python3 flutter/tools/gn --web --runtime-mode=release --no-rbe --no-goma
+          ninja -C out/wasm_release -j 4 flutter/third_party/canvaskit:skwasm_group
+      - name: Save experimental artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: unapproved-skwasm-source-build
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            engine/src/out/wasm_release/flutter_web_sdk/canvaskit/skwasm*
+            semaphore-test-build/
